@@ -1,0 +1,50 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class DoorOpen : MonoBehaviour
+{
+    // Setting the objects for the barriers and the player
+    [SerializeField] GameObject doorLeft;
+    [SerializeField] GameObject doorRight;
+    [SerializeField] GameObject player;
+    
+    int clockCount;
+    private bool sceneComplete = false;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        // If the scene is not complete, trigger the swell, and start IEnumerator Wait()
+        if (sceneComplete == false)
+        {
+            AkSoundEngine.PostEvent("Trigger_Swell", player);
+            StartCoroutine("Wait");
+        }
+    }
+
+    IEnumerator Wait()
+    {
+        // Wait 1 second and add 1 to the Clock Count variable, then start void ClockTicking()
+        yield return new WaitForSeconds(1f);
+        clockCount++;
+        ClockTicking();
+    }
+
+    void ClockTicking()
+    {
+        // If we have NOT looped this function five times, play the clock ticking sound, then loop back to IEnumerator Wait().
+        // Otherwise, deactivate the barrier, trigger our impact, and complete the scene.
+        if (clockCount != 5)
+        {
+            AkSoundEngine.PostEvent("Play_Clock", player);
+            StartCoroutine("Wait");
+        }
+        else
+        {
+            doorLeft.SetActive(false);
+            doorRight.SetActive(false);
+            AkSoundEngine.PostEvent("Trigger_Impact", player);
+            sceneComplete = true;
+        }
+    }    
+}
