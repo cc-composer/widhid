@@ -1,0 +1,60 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Narration : MonoBehaviour
+{
+    public GameObject player;
+    private int narration = 0;
+    private object waitTime;
+    public static bool narrationEnd = false;
+
+    void Start()
+    {
+        int randomCharacter = Random.Range(1, 3);
+        if (randomCharacter == 1)
+        { AkSoundEngine.SetState("PlayerName", "Danny"); }
+        else if (randomCharacter == 2)
+        {  AkSoundEngine.SetState("PlayerName", "John"); }
+        else
+        { AkSoundEngine.SetState("PlayerName", "Mike"); }
+        PlayNarration();
+    }
+
+    void PlayNarration()
+    {
+        if (narration == 5)
+        {
+            narrationEnd = true;
+            StartCoroutine("Wait2");
+        }
+        else
+        {
+            AkSoundEngine.PostEvent("NarrationSC", player, (uint)AkCallbackType.AK_EndOfEvent, NarrationEnd, waitTime);
+            narration++;
+
+        }
+    }
+
+    void NarrationEnd(object in_cookie, AkCallbackType in_type, object in_info)
+    {
+        StartCoroutine("Wait");
+    }
+
+    IEnumerator Wait()
+    {
+        yield return new WaitForSeconds(1f);
+        PlayNarration();
+    }
+
+    IEnumerator Wait2()
+    {
+        yield return new WaitForSeconds(5f);
+
+        if (MissionComplete.missionComplete == false)
+        {
+            AkSoundEngine.PostEvent("Mission", player);
+        }
+        else { }
+    }
+}
